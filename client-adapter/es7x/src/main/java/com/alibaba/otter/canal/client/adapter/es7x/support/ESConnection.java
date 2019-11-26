@@ -152,6 +152,14 @@ public class ESConnection {
         private IndexRequestBuilder indexRequestBuilder;
 
         private IndexRequest        indexRequest;
+        public ES7xIndexRequest(String index){
+            if (mode == ESClientMode.TRANSPORT) {
+                indexRequestBuilder = transportClient.prepareIndex();
+                indexRequestBuilder.setIndex(index);
+            } else {
+                indexRequest = new IndexRequest(index);
+            }
+        }
 
         public ES7xIndexRequest(String index, String id){
             if (mode == ESClientMode.TRANSPORT) {

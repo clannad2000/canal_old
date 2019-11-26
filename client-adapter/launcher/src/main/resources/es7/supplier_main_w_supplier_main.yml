@@ -1,0 +1,23 @@
+dataSourceKey: defaultDS
+destination: example
+groupId: g2
+esMapping:
+  _index: supplier_main
+  _type: _doc
+  #  _id: supplierId
+  upsert: true
+  pk: supplierId
+  specialFields:
+    brand:
+      type: nested
+#      properties: {id: id, url: url, brand_id: brandId, child_name: childName, car_name: carName, car_id: carId, group_id: groupId}
+  sql: "select supplier_id as supplierId,
+               concat('[', group_concat(
+                       json_object('groupId', group_id, 'childName', child_name, 'brandId', brand_id,
+                                   'carName', car_name, 'carId', car_id, 'url', url)), ']') AS brand
+        from w_supplier_main"
+  #objFields:
+  #  address: object
+  #  etlCondition: "where a.c_time>='{0}'"
+  commitBatch: 3000
+  #               concat(pro_name, city_name, area_name, detailed) AS address,

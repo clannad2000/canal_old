@@ -1,0 +1,27 @@
+dataSourceKey: defaultDS
+destination: example
+groupId: g2
+esMapping:
+  _index: supplier_main
+  _type: _doc
+  #  _id: supplierId
+  upsert: true
+  pk: supplierId
+  syncMode: simple
+  sql: "SELECT supplier_id        AS supplierId,
+               repair_center_name AS repairCenterName,
+               repair_center_name AS repairCenterCname,
+               shop_url           AS shopUrl,
+               manager_phone      AS managerPhone,
+               service_tel        AS serviceTel,
+               shop_profile       AS shopProfile,
+               member_end_time    AS memberEndTime,
+               audit,
+               supplier_order     AS supplierOrder,
+               member_level       AS memberLevel
+        FROM s_supplier"
+  #objFields:
+    #brand: object
+
+  #  etlCondition: "where a.c_time>='{0}'"
+  commitBatch: 3000

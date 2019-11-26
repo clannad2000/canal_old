@@ -62,18 +62,19 @@ public class ES7xTemplate implements ESTemplate {
 
     @Override
     public void insert(ESMapping mapping, Object pkVal, Map<String, Object> esFieldData) {
+        String parentVal = (String) esFieldData.remove("$parent_routing");
+        //分为_id和主键两种类型
         if (mapping.get_id() != null) {
-            String parentVal = (String) esFieldData.remove("$parent_routing");
             if (mapping.isUpsert()) {
                 ESUpdateRequest updateRequest = esConnection.new ES7xUpdateRequest(mapping.get_index(),
-                    pkVal.toString()).setDoc(esFieldData).setDocAsUpsert(true);
+                        pkVal.toString()).setDoc(esFieldData).setDocAsUpsert(true);
                 if (StringUtils.isNotEmpty(parentVal)) {
                     updateRequest.setRouting(parentVal);
                 }
                 getBulk().add(updateRequest);
             } else {
                 ESIndexRequest indexRequest = esConnection.new ES7xIndexRequest(mapping.get_index(), pkVal.toString())
-                    .setSource(esFieldData);
+                        .setSource(esFieldData);
                 if (StringUtils.isNotEmpty(parentVal)) {
                     indexRequest.setRouting(parentVal);
                 }
@@ -81,17 +82,30 @@ public class ES7xTemplate implements ESTemplate {
             }
             commitBulk();
         } else {
+            //主键插入
+            //根据主键查询es
             ESSearchRequest esSearchRequest = this.esConnection.new ESSearchRequest(mapping.get_index())
-                .setQuery(QueryBuilders.termQuery(mapping.getPk(), pkVal))
-                .size(10000);
+                    .setQuery(QueryBuilders.termQuery(mapping.getPk(), pkVal))
+                    .size(10000);
             SearchResponse response = esSearchRequest.getResponse();
-
-            for (SearchHit hit : response.getHits()) {
-                ESUpdateRequest esUpdateRequest = this.esConnection.new ES7xUpdateRequest(mapping.get_index(),
-                    hit.getId()).setDoc(esFieldData);
-                getBulk().add(esUpdateRequest);
-                commitBulk();
+            System.out.println(response.getHits().getHits().length);
+            //如果查询未命中则直接插入,否则更新
+            if (response.getHits().getHits().length == 0) {
+                ESIndexRequest indexRequest = esConnection.new ES7xIndexRequest(mapping.get_index())
+                        .setSource(esFieldData);
+                if (StringUtils.isNotEmpty(parentVal)) {
+                    indexRequest.setRouting(parentVal);
+                }
+                //设置路由
+                getBulk().add(indexRequest);
+            } else {
+                for (SearchHit hit : response.getHits()) {
+                    ESUpdateRequest esUpdateRequest = this.esConnection.new ES7xUpdateRequest(mapping.get_index(),
+                            hit.getId()).setDoc(esFieldData);
+                    getBulk().add(esUpdateRequest);
+                }
             }
+            commitBulk();
         }
     }
 

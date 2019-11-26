@@ -1,0 +1,43 @@
+dataSourceKey: defaultDS
+destination: example
+groupId: g2
+esMapping:
+  _index: supplier_main
+  _type: _doc
+  #  _id: supplierId
+  upsert: true
+  pk: supplierId
+  syncMode: simple
+  specialFields:
+    address:
+      type: array
+      element: pro_name,city_name,area_name,detailed
+    location:
+      type: geoPoint
+      element: lat,lng
+  sql: "SELECT id                                               AS supplierId,
+               user_name                                        AS userName,
+               tel,
+               number,
+               unionid,
+               company                                          AS supplierName,
+               contact,
+               concat(pro_name, city_name, area_name, detailed) AS address,
+               pro_number                                       AS proNumber,
+               area_number                                      AS areaNumber,
+               city_number                                      AS cityNumber,
+               head_url                                         AS supplierHead,
+               creation_time                                    AS creationTime,
+               account,
+               account_state                                    AS accountState,
+               user_state                                       AS userState,
+               rong_token                                       AS rongToken,
+               modify_time                                      AS modifyTime,
+               tx_token                                         AS txToken,
+               concat(IFNULL(lat, 0), IFNULL(lng, 0))           AS location
+        FROM s_user"
+  objFields:
+    address: array
+#  etlCondition: "where a.c_time>='{0}'"
+  commitBatch: 3000
+  #               concat(pro_name, city_name, area_name, detailed) AS address,
