@@ -8,13 +8,6 @@ esMapping:
   upsert: true
   pk: supplierId
   syncMode: simple
-  specialFields:
-    address:
-      type: array
-      element: pro_name,city_name,area_name,detailed
-    location:
-      type: geoPoint
-      element: lat,lng
   sql: "SELECT id                                               AS supplierId,
                user_name                                        AS userName,
                tel,
@@ -38,6 +31,7 @@ esMapping:
         FROM s_user"
   objFields:
     address: array
+    location: geo_point
 #  etlCondition: "where a.c_time>='{0}'"
   commitBatch: 3000
   #               concat(pro_name, city_name, area_name, detailed) AS address,
