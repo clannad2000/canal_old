@@ -1,9 +1,6 @@
 package com.alibaba.otter.canal.client.adapter.es.core.config;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.alibaba.otter.canal.client.adapter.support.AdapterConfig;
 
@@ -26,6 +23,8 @@ public class ESSyncConfig implements AdapterConfig {
     private ESMapping esMapping;
 
     private String    esVersion = "es6";
+
+
 
     public void validate() {
         if (esMapping._index == null) {
@@ -113,6 +112,55 @@ public class ESSyncConfig implements AdapterConfig {
         private Long                         syncInterval;                           // 同步时间间隔
 
         private SchemaItem                   schemaItem;                             // sql解析结果模型
+
+        private String                       syncMode = "default";
+        private Map<String, FieldMapping> specialFields = new HashMap<>();
+
+        public Map<String, FieldMapping> getSpecialFields() {
+            return specialFields;
+        }
+
+        public void setSpecialFields(Map<String, FieldMapping> specialFields) {
+            this.specialFields = specialFields;
+        }
+
+        public String getSyncMode() {
+            return syncMode;
+        }
+
+        public void setSyncMode(String syncMode) {
+            this.syncMode = syncMode;
+        }
+
+        public static class FieldMapping {
+            private String type;
+            private String element;
+            private LinkedHashMap<String, String> properties;
+
+            public String getElement() {
+                return element;
+            }
+
+            public void setElement(String element) {
+                this.element = element;
+            }
+
+            public LinkedHashMap<String, String> getProperties() {
+                return properties;
+            }
+
+            public void setProperties(LinkedHashMap<String, String> properties) {
+                this.properties = properties;
+            }
+
+            public String getType() {
+                return type;
+            }
+
+            public void setType(String type) {
+                this.type = type;
+            }
+        }
 
         public String get_index() {
             return _index;

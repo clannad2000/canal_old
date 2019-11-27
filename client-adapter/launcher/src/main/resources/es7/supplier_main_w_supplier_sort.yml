@@ -12,7 +12,7 @@ esMapping:
                call_number AS callNumber,
                sell_number AS sellNumber
         FROM w_supplier_sort"
-  #objFields:
-    #brand: object
+    #objFields:
+  #brand: object
   #  etlCondition: "where a.c_time>='{0}'"
   commitBatch: 3000
