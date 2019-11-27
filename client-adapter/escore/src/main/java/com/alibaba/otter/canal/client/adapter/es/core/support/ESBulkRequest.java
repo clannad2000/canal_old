@@ -1,5 +1,6 @@
 package com.alibaba.otter.canal.client.adapter.es.core.support;
 
+import java.util.List;
 import java.util.Map;
 
 public interface ESBulkRequest {
@@ -15,6 +16,8 @@ public interface ESBulkRequest {
     int numberOfActions();
 
     ESBulkResponse bulk();
+
+    List getRequest();
 
     interface ESIndexRequest {
 
@@ -38,6 +41,6 @@ public interface ESBulkRequest {
     interface ESBulkResponse {
         boolean hasFailures();
 
-        void processFailBulkResponse(String errorMsg);
+       List processFailBulkResponse(String errorMsg);
     }
 }

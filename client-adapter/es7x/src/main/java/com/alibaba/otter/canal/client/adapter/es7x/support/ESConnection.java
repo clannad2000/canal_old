@@ -3,8 +3,11 @@ package com.alibaba.otter.canal.client.adapter.es7x.support;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -40,6 +43,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.gson.Gson;
 
 import com.alibaba.otter.canal.client.adapter.es.core.support.ESBulkRequest;
 
@@ -54,16 +58,16 @@ public class ESConnection {
     private static final Logger logger = LoggerFactory.getLogger(ESConnection.class);
 
     public enum ESClientMode {
-                              TRANSPORT, REST
+        TRANSPORT, REST
     }
 
-    private ESClientMode        mode;
+    private ESClientMode mode;
 
-    private TransportClient     transportClient;
+    private TransportClient transportClient;
 
     private RestHighLevelClient restHighLevelClient;
 
-    public ESConnection(String[] hosts, Map<String, String> properties, ESClientMode mode) throws UnknownHostException{
+    public ESConnection(String[] hosts, Map<String, String> properties, ESClientMode mode) throws UnknownHostException {
         this.mode = mode;
         if (mode == ESClientMode.TRANSPORT) {
             Settings.Builder settingBuilder = Settings.builder();
@@ -73,7 +77,7 @@ public class ESConnection {
             for (String host : hosts) {
                 int i = host.indexOf(":");
                 transportClient.addTransportAddress(new TransportAddress(InetAddress.getByName(host.substring(0, i)),
-                    Integer.parseInt(host.substring(i + 1))));
+                        Integer.parseInt(host.substring(i + 1))));
             }
         } else {
             HttpHost[] httpHosts = new HttpHost[hosts.length];
@@ -81,7 +85,7 @@ public class ESConnection {
                 String host = hosts[i];
                 int j = host.indexOf(":");
                 HttpHost httpHost = new HttpHost(InetAddress.getByName(host.substring(0, j)),
-                    Integer.parseInt(host.substring(j + 1)));
+                        Integer.parseInt(host.substring(j + 1)));
                 httpHosts[i] = httpHost;
             }
             RestClientBuilder restClientBuilder = RestClient.builder(httpHosts);
@@ -90,9 +94,9 @@ public class ESConnection {
                 String[] nameAndPwdArr = nameAndPwd.split(":");
                 final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
                 credentialsProvider.setCredentials(AuthScope.ANY,
-                    new UsernamePasswordCredentials(nameAndPwdArr[0], nameAndPwdArr[1]));
+                        new UsernamePasswordCredentials(nameAndPwdArr[0], nameAndPwdArr[1]));
                 restClientBuilder.setHttpClientConfigCallback(
-                    httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+                        httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
             }
             restHighLevelClient = new RestHighLevelClient(restClientBuilder);
         }
@@ -115,15 +119,15 @@ public class ESConnection {
         if (mode == ESClientMode.TRANSPORT) {
             try {
                 mappingMetaData = transportClient.admin()
-                    .cluster()
-                    .prepareState()
-                    .execute()
-                    .actionGet()
-                    .getState()
-                    .getMetaData()
-                    .getIndices()
-                    .get(index)
-                    .mapping();
+                        .cluster()
+                        .prepareState()
+                        .execute()
+                        .actionGet()
+                        .getState()
+                        .getMetaData()
+                        .getIndices()
+                        .get(index)
+                        .mapping();
             } catch (NullPointerException e) {
                 throw new IllegalArgumentException("Not found the mapping info of index: " + index);
             }
@@ -133,7 +137,7 @@ public class ESConnection {
                 GetMappingsRequest request = new GetMappingsRequest();
                 request.indices(index);
                 GetMappingsResponse response = restHighLevelClient.indices()
-                    .getMapping(request, RequestOptions.DEFAULT);
+                        .getMapping(request, RequestOptions.DEFAULT);
 
                 mappings = response.mappings();
             } catch (NullPointerException e) {
@@ -151,8 +155,9 @@ public class ESConnection {
 
         private IndexRequestBuilder indexRequestBuilder;
 
-        private IndexRequest        indexRequest;
-        public ES7xIndexRequest(String index){
+        private IndexRequest indexRequest;
+
+        public ES7xIndexRequest(String index) {
             if (mode == ESClientMode.TRANSPORT) {
                 indexRequestBuilder = transportClient.prepareIndex();
                 indexRequestBuilder.setIndex(index);
@@ -161,7 +166,7 @@ public class ESConnection {
             }
         }
 
-        public ES7xIndexRequest(String index, String id){
+        public ES7xIndexRequest(String index, String id) {
             if (mode == ESClientMode.TRANSPORT) {
                 indexRequestBuilder = transportClient.prepareIndex();
                 indexRequestBuilder.setIndex(index);
@@ -211,9 +216,9 @@ public class ESConnection {
 
         private UpdateRequestBuilder updateRequestBuilder;
 
-        private UpdateRequest        updateRequest;
+        private UpdateRequest updateRequest;
 
-        public ES7xUpdateRequest(String index, String id){
+        public ES7xUpdateRequest(String index, String id) {
             if (mode == ESClientMode.TRANSPORT) {
                 updateRequestBuilder = transportClient.prepareUpdate();
                 updateRequestBuilder.setIndex(index);
@@ -271,9 +276,9 @@ public class ESConnection {
 
         private DeleteRequestBuilder deleteRequestBuilder;
 
-        private DeleteRequest        deleteRequest;
+        private DeleteRequest deleteRequest;
 
-        public ES7xDeleteRequest(String index, String id){
+        public ES7xDeleteRequest(String index, String id) {
             if (mode == ESClientMode.TRANSPORT) {
                 deleteRequestBuilder = transportClient.prepareDelete();
                 deleteRequestBuilder.setIndex(index);
@@ -304,11 +309,11 @@ public class ESConnection {
 
         private SearchRequestBuilder searchRequestBuilder;
 
-        private SearchRequest        searchRequest;
+        private SearchRequest searchRequest;
 
-        private SearchSourceBuilder  sourceBuilder;
+        private SearchSourceBuilder sourceBuilder;
 
-        public ESSearchRequest(String index){
+        public ESSearchRequest(String index) {
             if (mode == ESClientMode.TRANSPORT) {
                 searchRequestBuilder = transportClient.prepareSearch(index);
             } else {
@@ -369,9 +374,9 @@ public class ESConnection {
 
         private BulkRequestBuilder bulkRequestBuilder;
 
-        private BulkRequest        bulkRequest;
+        private BulkRequest bulkRequest;
 
-        public ES7xBulkRequest(){
+        public ES7xBulkRequest() {
             if (mode == ESClientMode.TRANSPORT) {
                 bulkRequestBuilder = transportClient.prepareBulk();
             } else {
@@ -439,6 +444,7 @@ public class ESConnection {
             }
         }
 
+
         public BulkRequestBuilder getBulkRequestBuilder() {
             return bulkRequestBuilder;
         }
@@ -454,13 +460,18 @@ public class ESConnection {
         public void setBulkRequest(BulkRequest bulkRequest) {
             this.bulkRequest = bulkRequest;
         }
+
+        @Override
+        public List getRequest() {
+            return bulkRequest.requests();
+        }
     }
 
     public static class ES7xBulkResponse implements ESBulkRequest.ESBulkResponse {
 
         private BulkResponse bulkResponse;
 
-        public ES7xBulkResponse(BulkResponse bulkResponse){
+        public ES7xBulkResponse(BulkResponse bulkResponse) {
             this.bulkResponse = bulkResponse;
         }
 
@@ -470,18 +481,24 @@ public class ESConnection {
         }
 
         @Override
-        public void processFailBulkResponse(String errorMsg) {
-            for (BulkItemResponse itemResponse : bulkResponse.getItems()) {
+        public List processFailBulkResponse(String errorMsg) {
+            List<BulkItemResponse> list = new ArrayList<>();
+            for (int i = 0; i < bulkResponse.getItems().length; i++) {
+                list.add(null);
+                BulkItemResponse itemResponse = bulkResponse.getItems()[i];
                 if (!itemResponse.isFailed()) {
+                    list.set(i,itemResponse);
                     continue;
                 }
 
                 if (itemResponse.getFailure().getStatus() == RestStatus.NOT_FOUND) {
+                    list.set(i,itemResponse);
                     logger.error(itemResponse.getFailureMessage());
                 } else {
-                    throw new RuntimeException(errorMsg + itemResponse.getFailureMessage());
+                    System.err.println(errorMsg + itemResponse.getFailureMessage());
                 }
             }
+            return list;
         }
     }
 

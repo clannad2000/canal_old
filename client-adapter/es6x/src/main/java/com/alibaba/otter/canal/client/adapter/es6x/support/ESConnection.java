@@ -3,8 +3,11 @@ package com.alibaba.otter.canal.client.adapter.es6x.support;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.otter.canal.client.adapter.es.core.support.ESBulkRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHost;
@@ -432,6 +435,11 @@ public class ESConnection {
             }
         }
 
+        @Override
+        public List getRequest() {
+            return bulkRequest.requests();
+        }
+
         public BulkRequestBuilder getBulkRequestBuilder() {
             return bulkRequestBuilder;
         }
@@ -463,18 +471,22 @@ public class ESConnection {
         }
 
         @Override
-        public void processFailBulkResponse(String errorMsg) {
+        public List processFailBulkResponse(String errorMsg) {
+            List<BulkItemResponse> list = new ArrayList<>();
             for (BulkItemResponse itemResponse : bulkResponse.getItems()) {
                 if (!itemResponse.isFailed()) {
+                    list.add(itemResponse);
                     continue;
                 }
 
                 if (itemResponse.getFailure().getStatus() == RestStatus.NOT_FOUND) {
+                    list.add(itemResponse);
                     logger.error(itemResponse.getFailureMessage());
                 } else {
                     throw new RuntimeException(errorMsg + itemResponse.getFailureMessage());
                 }
             }
+            return list;
         }
     }
 
