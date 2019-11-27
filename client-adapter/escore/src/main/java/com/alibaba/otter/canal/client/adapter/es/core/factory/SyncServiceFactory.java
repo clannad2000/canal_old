@@ -1,9 +1,9 @@
 package com.alibaba.otter.canal.client.adapter.es.core.factory;
 
-import com.alibaba.otter.canal.client.adapter.es.core.config.ESSyncConfig;
-import com.alibaba.otter.canal.client.adapter.es.core.service.ESSyncService;
-import com.alibaba.otter.canal.client.adapter.es.core.service.SyncService;
+import com.alibaba.otter.canal.client.adapter.es.core.annotation.SyncImpl;
+import com.alibaba.otter.canal.client.adapter.es.core.service.sync.SyncService;
 import com.alibaba.otter.canal.client.adapter.es.core.support.ESTemplate;
+import com.alibaba.otter.canal.client.adapter.es.core.util.Util;
 import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Constructor;
@@ -17,19 +17,22 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Version1.0
  */
 public class SyncServiceFactory {
-
+    private static ESTemplate esTemplate;
     private static Map<String, SyncService> serviceMap = new ConcurrentHashMap<>();
 
-    public static synchronized SyncService getInstance(ESTemplate esTemplate, String name) throws Exception {
-        if (serviceMap.get(name) != null) {
-            return serviceMap.get(name);
+    public static void initSyncServiceImpl(ESTemplate esTemplate) throws Exception {
+        SyncServiceFactory.esTemplate = esTemplate;
+        for (Class<?> cls : Util.getClasses(SyncService.class.getPackage().getName())) {
+            SyncImpl annotation = cls.getAnnotation(SyncImpl.class);
+            if (annotation != null) {
+                Constructor<?> constructor = cls.getConstructor(ESTemplate.class);
+                SyncService syncService = (SyncService) constructor.newInstance(esTemplate);
+                serviceMap.put(annotation.value(), syncService);
+            }
         }
-        String className = SyncService.class.getPackage().getName() + "." + StringUtils.capitalize(name) + "ESSyncServiceImpl";
-        Class<?> cls = Class.forName(className);
-        Constructor<?> constructor = cls.getConstructor(ESTemplate.class);
-        SyncService syncService = (SyncService) constructor.newInstance(esTemplate);
-        //SyncService syncService = (SyncService) cls.newInstance();
-        serviceMap.put(name, syncService);
-        return syncService;
+    }
+
+    public static SyncService getInstance(String name) {
+        return serviceMap.get(name);
     }
 }

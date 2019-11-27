@@ -1,6 +1,5 @@
 package com.alibaba.otter.canal.client.adapter.es.core;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -8,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.alibaba.otter.canal.client.adapter.es.core.factory.SyncServiceFactory;
 import com.alibaba.otter.canal.client.adapter.es.core.support.ESTemplate;
 import org.apache.commons.lang.StringUtils;
 
@@ -77,7 +77,7 @@ public abstract class ESAdapter implements OuterAdapter {
             }
 
             esSyncService = new ESSyncService(esTemplate);
-
+            SyncServiceFactory.initSyncServiceImpl(esTemplate);
             esConfigMonitor = new ESConfigMonitor();
             esConfigMonitor.init(this, envProperties);
         } catch (Throwable e) {

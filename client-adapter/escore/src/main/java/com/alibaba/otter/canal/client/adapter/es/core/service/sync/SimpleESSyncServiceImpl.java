@@ -1,18 +1,16 @@
-package com.alibaba.otter.canal.client.adapter.es.core.service;
+package com.alibaba.otter.canal.client.adapter.es.core.service.sync;
 
+import com.alibaba.otter.canal.client.adapter.es.core.annotation.SyncImpl;
 import com.alibaba.otter.canal.client.adapter.es.core.config.ESSyncConfig;
 import com.alibaba.otter.canal.client.adapter.es.core.config.ESSyncConfig.ESMapping;
 import com.alibaba.otter.canal.client.adapter.es.core.config.SchemaItem;
 import com.alibaba.otter.canal.client.adapter.es.core.config.SchemaItem.FieldItem;
-import com.alibaba.otter.canal.client.adapter.es.core.support.ESSyncUtil;
+import com.alibaba.otter.canal.client.adapter.es.core.service.ESSyncService;
 import com.alibaba.otter.canal.client.adapter.es.core.support.ESTemplate;
-import com.alibaba.otter.canal.client.adapter.support.DatasourceConfig;
 import com.alibaba.otter.canal.client.adapter.support.Dml;
-import com.alibaba.otter.canal.client.adapter.support.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import java.util.*;
 
 /**
@@ -21,9 +19,9 @@ import java.util.*;
  * @Date 2019/11/22
  * @Version1.0
  */
+@SyncImpl("simple")
 public class SimpleESSyncServiceImpl extends ESSyncService implements SyncService {
     private static Logger logger = LoggerFactory.getLogger(SimpleESSyncServiceImpl.class);
-
 
     public SimpleESSyncServiceImpl(ESTemplate esTemplate) {
         super(esTemplate);

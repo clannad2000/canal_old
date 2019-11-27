@@ -1,4 +1,4 @@
-package com.alibaba.otter.canal.client.adapter.es.core.service;
+package com.alibaba.otter.canal.client.adapter.es.core.service.sync;
 
 import com.alibaba.otter.canal.client.adapter.es.core.config.ESSyncConfig;
 import com.alibaba.otter.canal.client.adapter.es.core.config.SchemaItem;

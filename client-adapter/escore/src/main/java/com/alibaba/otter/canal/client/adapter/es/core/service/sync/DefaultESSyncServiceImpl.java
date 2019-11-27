@@ -1,16 +1,16 @@
-package com.alibaba.otter.canal.client.adapter.es.core.service;
+package com.alibaba.otter.canal.client.adapter.es.core.service.sync;
 
 import java.util.*;
 
 import javax.sql.DataSource;
 
 import com.alibaba.fastsql.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
+import com.alibaba.otter.canal.client.adapter.es.core.annotation.SyncImpl;
 import com.alibaba.otter.canal.client.adapter.es.core.config.SqlParser;
+import com.alibaba.otter.canal.client.adapter.es.core.service.ESSyncService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.otter.canal.client.adapter.es.core.config.ESSyncConfig;
 import com.alibaba.otter.canal.client.adapter.es.core.config.ESSyncConfig.ESMapping;
 import com.alibaba.otter.canal.client.adapter.es.core.config.SchemaItem;
@@ -29,7 +29,8 @@ import com.alibaba.otter.canal.client.adapter.support.Util;
  * @author rewerma 2018-11-01
  * @version 1.0.0
  */
-public class DefaultESSyncServiceImpl extends ESSyncService implements SyncService{
+@SyncImpl
+public class DefaultESSyncServiceImpl extends ESSyncService implements SyncService {
 
     private static Logger logger = LoggerFactory.getLogger(DefaultESSyncServiceImpl.class);
 
@@ -43,7 +44,7 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
      * 插入操作dml
      *
      * @param config es配置
-     * @param dml dml数据
+     * @param dml    dml数据
      */
     @Override
     public void insert(ESSyncConfig config, Dml dml) {
@@ -114,7 +115,7 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
      * 更新操作dml
      *
      * @param config es配置
-     * @param dml dml数据
+     * @param dml    dml数据
      */
     @Override
     public void update(ESSyncConfig config, Dml dml) {
@@ -147,7 +148,8 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
                     }
 
                     boolean allUpdateFieldSimple = true;
-                    out: for (FieldItem fieldItem : schemaItem.getSelectFields().values()) {
+                    out:
+                    for (FieldItem fieldItem : schemaItem.getSelectFields().values()) {
                         for (ColumnItem columnItem : fieldItem.getColumnItems()) {
                             if (old.containsKey(columnItem.getColumnName())) {
                                 if (fieldItem.isMethod() || fieldItem.isBinaryOp()) {
@@ -246,7 +248,7 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
      * 删除操作dml
      *
      * @param config es配置
-     * @param dml dml数据
+     * @param dml    dml数据
      */
     @Override
     public void delete(ESSyncConfig config, Dml dml) {
@@ -355,8 +357,8 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
      * 单表简单字段insert
      *
      * @param config es配置
-     * @param dml dml信息
-     * @param data 单行dml数据
+     * @param dml    dml信息
+     * @param data   单行dml数据
      */
     private void singleTableSimpleFiledInsert(ESSyncConfig config, Dml dml, Map<String, Object> data) {
         ESMapping mapping = config.getEsMapping();
@@ -377,8 +379,8 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
      * 主表(单表)复杂字段insert
      *
      * @param config es配置
-     * @param dml dml信息
-     * @param data 单行dml数据
+     * @param dml    dml信息
+     * @param data   单行dml数据
      */
     private void mainTableInsert(ESSyncConfig config, Dml dml, Map<String, Object> data) {
         ESMapping mapping = config.getEsMapping();
@@ -463,9 +465,9 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
     /**
      * 关联表主表简单字段operation
      *
-     * @param config es配置
-     * @param dml dml信息
-     * @param data 单行dml数据
+     * @param config    es配置
+     * @param dml       dml信息
+     * @param data      单行dml数据
      * @param tableItem 当前表配置
      */
     private void joinTableSimpleFieldOperation(ESSyncConfig config, Dml dml, Map<String, Object> data,
@@ -503,10 +505,10 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
     /**
      * 关联子查询, 主表简单字段operation
      *
-     * @param config es配置
-     * @param dml dml信息
-     * @param data 单行dml数据
-     * @param old 单行old数据
+     * @param config    es配置
+     * @param dml       dml信息
+     * @param data      单行dml数据
+     * @param old       单行old数据
      * @param tableItem 当前表配置
      */
     private void subTableSimpleFieldOperation(ESSyncConfig config, Dml dml, Map<String, Object> data,
@@ -556,7 +558,8 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
 
                     for (FieldItem fieldItem : tableItem.getRelationSelectFieldItems()) {
                         if (old != null) {
-                            out: for (FieldItem fieldItem1 : tableItem.getSubQueryFields()) {
+                            out:
+                            for (FieldItem fieldItem1 : tableItem.getSubQueryFields()) {
                                 for (ColumnItem columnItem0 : fieldItem.getColumnItems()) {
                                     if (fieldItem1.getFieldName().equals(columnItem0.getColumnName()))
                                         for (ColumnItem columnItem : fieldItem1.getColumnItems()) {
@@ -616,9 +619,9 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
     /**
      * 关联(子查询), 主表复杂字段operation, 全sql执行
      *
-     * @param config es配置
-     * @param dml dml信息
-     * @param data 单行dml数据
+     * @param config    es配置
+     * @param dml       dml信息
+     * @param data      单行dml数据
      * @param tableItem 当前表配置
      */
     private void wholeSqlOperation(ESSyncConfig config, Dml dml, Map<String, Object> data, Map<String, Object> old,
@@ -660,7 +663,8 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
                     for (FieldItem fieldItem : tableItem.getRelationSelectFieldItems()) {
                         if (old != null) {
                             // 从表子查询
-                            out: for (FieldItem fieldItem1 : tableItem.getSubQueryFields()) {
+                            out:
+                            for (FieldItem fieldItem1 : tableItem.getSubQueryFields()) {
                                 for (ColumnItem columnItem0 : fieldItem.getColumnItems()) {
                                     if (fieldItem1.getFieldName().equals(columnItem0.getColumnName()))
                                         for (ColumnItem columnItem : fieldItem1.getColumnItems()) {
@@ -731,9 +735,9 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
      * 单表简单字段update
      *
      * @param config es配置
-     * @param dml dml信息
-     * @param data 单行data数据
-     * @param old 单行old数据
+     * @param dml    dml信息
+     * @param data   单行data数据
+     * @param old    单行old数据
      */
     private void singleTableSimpleFiledUpdate(ESSyncConfig config, Dml dml, Map<String, Object> data,
                                               Map<String, Object> old) {
@@ -756,8 +760,8 @@ public class DefaultESSyncServiceImpl extends ESSyncService implements SyncServi
      * 主表(单表)复杂字段update
      *
      * @param config es配置
-     * @param dml dml信息
-     * @param data 单行dml数据
+     * @param dml    dml信息
+     * @param data   单行dml数据
      */
     private void mainTableUpdate(ESSyncConfig config, Dml dml, Map<String, Object> data, Map<String, Object> old) {
         ESMapping mapping = config.getEsMapping();

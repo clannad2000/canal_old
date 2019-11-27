@@ -97,11 +97,11 @@ public class ESSyncService {
 
             String type = dml.getType();
             if (type != null && type.equalsIgnoreCase("INSERT")) {
-                SyncServiceFactory.getInstance(esTemplate,config.getEsMapping().getSyncMode()).insert(config, dml);
+                SyncServiceFactory.getInstance(config.getEsMapping().getSyncMode()).insert(config, dml);
             } else if (type != null && type.equalsIgnoreCase("UPDATE")) {
-                SyncServiceFactory.getInstance(esTemplate,config.getEsMapping().getSyncMode()).update(config, dml);
+                SyncServiceFactory.getInstance(config.getEsMapping().getSyncMode()).update(config, dml);
             } else if (type != null && type.equalsIgnoreCase("DELETE")) {
-                SyncServiceFactory.getInstance(esTemplate,config.getEsMapping().getSyncMode()).delete(config, dml);
+                SyncServiceFactory.getInstance(config.getEsMapping().getSyncMode()).delete(config, dml);
             } else {
                 return;
             }

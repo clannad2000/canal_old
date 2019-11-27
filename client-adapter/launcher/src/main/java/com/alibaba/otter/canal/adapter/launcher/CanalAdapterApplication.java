@@ -3,6 +3,7 @@ package com.alibaba.otter.canal.adapter.launcher;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * 启动入口
@@ -16,6 +17,6 @@ public class CanalAdapterApplication {
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(CanalAdapterApplication.class);
         application.setBannerMode(Banner.Mode.OFF);
-        application.run(args);
+        ConfigurableApplicationContext run = application.run(args);
     }
 }
