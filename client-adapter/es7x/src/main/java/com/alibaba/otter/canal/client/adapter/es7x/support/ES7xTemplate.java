@@ -93,7 +93,6 @@ public class ES7xTemplate implements ESTemplate {
                     .setQuery(QueryBuilders.termQuery(mapping.getPk(), pkVal))
                     .size(10000);
             SearchResponse response = esSearchRequest.getResponse();
-            System.out.println(response.getHits().getHits().length);
             //如果查询未命中则直接插入,否则更新
             if (response.getHits().getHits().length == 0) {
                 ESIndexRequest indexRequest = esConnection.new ES7xIndexRequest(mapping.get_index())
@@ -184,6 +183,7 @@ public class ES7xTemplate implements ESTemplate {
 
     @Override
     public void commit() {
+        System.out.println("提交请求数量:"+getBulk().numberOfActions());
         if (getBulk().numberOfActions() > 0) {
             List<DocWriteRequest<?>> requestList = getBulk().getRequest();
             ESBulkResponse response = esBulkRequest.bulk();

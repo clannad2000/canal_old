@@ -1,17 +1,25 @@
 package com.alibaba.otter.canal.client.adapter.es.core.service.sync;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.otter.canal.client.adapter.es.core.annotation.SyncImpl;
 import com.alibaba.otter.canal.client.adapter.es.core.config.ESSyncConfig;
 import com.alibaba.otter.canal.client.adapter.es.core.config.ESSyncConfig.ESMapping;
 import com.alibaba.otter.canal.client.adapter.es.core.config.SchemaItem;
 import com.alibaba.otter.canal.client.adapter.es.core.config.SchemaItem.FieldItem;
 import com.alibaba.otter.canal.client.adapter.es.core.service.ESSyncService;
+import com.alibaba.otter.canal.client.adapter.es.core.support.ESSyncUtil;
 import com.alibaba.otter.canal.client.adapter.es.core.support.ESTemplate;
+import com.alibaba.otter.canal.client.adapter.support.DatasourceConfig;
 import com.alibaba.otter.canal.client.adapter.support.Dml;
+import com.alibaba.otter.canal.client.adapter.support.Util;
+import com.alibaba.otter.canal.common.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description
@@ -42,6 +50,10 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
         for (Map<String, Object> data : dataList) {
             if (data == null || data.isEmpty()) {
                 continue;
+            }
+            if (!findSpecialField(config.getEsMapping(), "nested").isEmpty()) {
+                nestedFieldInsert(config, dml, data);
+                return;
             }
             singleTableSimpleFiledInsert(config, dml, data);
         }
@@ -205,4 +217,86 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
                 break;
         }
     }
+
+    public Map<String, ESMapping.FieldMapping> findSpecialField(ESMapping esMapping, String type) {
+        Map<String, ESMapping.FieldMapping> map = new ConcurrentHashMap<>();
+        esMapping.getSpecialFields().forEach((key, value) -> {
+            if (value.getType().equalsIgnoreCase(type)) {
+                map.put(key, value);
+            }
+        });
+        return map;
+    }
+
+
+    /**
+     * 嵌套字段insert
+     *
+     * @param config es配置
+     * @param dml    dml信息
+     * @param data   单行dml数据
+     */
+    private void nestedFieldInsert(ESSyncConfig config, Dml dml, Map<String, Object> data) {
+        ESMapping mapping = config.getEsMapping();
+        String sql = mapping.getSql();
+        String condition = ESSyncUtil.pkConditionSql(mapping, data);
+        sql = ESSyncUtil.appendCondition(sql, condition);
+        DataSource ds = DatasourceConfig.DATA_SOURCES.get(config.getDataSourceKey());
+        if (logger.isTraceEnabled()) {
+            logger.trace("Main table insert to es index by query sql, destination:{}, table: {}, index: {}, sql: {}",
+                    config.getDestination(),
+                    dml.getTable(),
+                    mapping.get_index(),
+                    sql.replace("\n", " "));
+        }
+        Util.sqlRS(ds, sql, rs -> {
+            try {
+                Map<String, Object> esFieldData = new LinkedHashMap<>();
+
+                Map<String, Object> map = new ConcurrentHashMap<>();
+                Map<String, ESMapping.FieldMapping> specialFieldList = findSpecialField(config.getEsMapping(), "nested");
+
+                specialFieldList.forEach((key, value) -> {
+                    List<Map<String, Object>> fieldDate = Util.getFieldDate(Util.getQueryDate(rs), key, Arrays.asList(value.getElement().split(",")));
+                    map.put(key, fieldDate);
+                });
+//                specialFieldList.forEach((key, value) -> {
+//                    while (true) {
+//                        try {
+//                            if (!rs.next()) break;
+//                        } catch (SQLException e) {
+//                            e.printStackTrace();
+//                        }
+//                        Map<String, Object> m = new ConcurrentHashMap<>();
+//                        for (String s : Arrays.asList(value.getElement().split(","))) {
+//                            try {
+//                                m.put(s, rs.getObject(s));
+//                            } catch (SQLException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                        mapList.add(m);
+//                    }
+//                    map.put(key, mapList);
+//                });
+                String idFieldName = mapping.get_id() == null ? mapping.getPk() : mapping.get_id();
+                Object idVal = data.get(idFieldName);
+
+                if (logger.isTraceEnabled()) {
+                    logger.trace(
+                            "Main table insert to es index by query sql, destination:{}, table: {}, index: {}, id: {}",
+                            config.getDestination(),
+                            dml.getTable(),
+                            mapping.get_index(),
+                            idVal);
+                }
+                esTemplate.insert(mapping, idVal, esFieldData);
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return 0;
+        });
+    }
+
 }

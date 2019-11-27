@@ -7,12 +7,14 @@ esMapping:
   #  _id: supplierId
   upsert: true
   pk: supplierId
-  sql: "select supplier_id as supplierId,
-               concat('[', group_concat(
-                       json_object('groupId', group_id, 'childName', child_name, 'brandId', brand_id,
-                                   'carName', car_name, 'carId', car_id, 'url', url)), ']') AS brand
+  syncMode: simple
+  specialFields:
+    brand:
+      type: nested
+      element: id,url,brandId,childName,carName,carId,groupId
+  sql: "select supplier_id as supplierId, id, url, brand_id as brandId, child_name as childName, car_name as carName, car_id as carId, group_id as groupId
         from w_supplier_main"
-  objFields:
-    brand: object
+#  objFields:
+#    brand: object
   #  etlCondition: "where a.c_time>='{0}'"
   commitBatch: 3000

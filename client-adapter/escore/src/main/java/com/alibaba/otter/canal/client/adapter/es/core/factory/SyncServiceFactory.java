@@ -3,8 +3,7 @@ package com.alibaba.otter.canal.client.adapter.es.core.factory;
 import com.alibaba.otter.canal.client.adapter.es.core.annotation.SyncImpl;
 import com.alibaba.otter.canal.client.adapter.es.core.service.sync.SyncService;
 import com.alibaba.otter.canal.client.adapter.es.core.support.ESTemplate;
-import com.alibaba.otter.canal.client.adapter.es.core.util.Util;
-import org.apache.commons.lang.StringUtils;
+import com.alibaba.otter.canal.client.adapter.support.Util;
 
 import java.lang.reflect.Constructor;
 import java.util.*;

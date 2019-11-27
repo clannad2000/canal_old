@@ -206,6 +206,7 @@ public class ESSyncConfig implements AdapterConfig {
             return objFields;
         }
 
+
         public void setObjFields(Map<String, String> objFields) {
             this.objFields = objFields;
         }
