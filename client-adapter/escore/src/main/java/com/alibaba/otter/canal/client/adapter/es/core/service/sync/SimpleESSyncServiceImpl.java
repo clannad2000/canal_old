@@ -252,35 +252,15 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
         Util.sqlRS(ds, sql, rs -> {
             try {
                 Map<String, Object> esFieldData = new LinkedHashMap<>();
-
-                Map<String, Object> map = new ConcurrentHashMap<>();
                 Map<String, ESMapping.FieldMapping> specialFieldList = findSpecialField(config.getEsMapping(), "nested");
-
+                List<Map<String, Object>> queryDate = Util.getQueryDate(rs);
                 specialFieldList.forEach((key, value) -> {
-                    List<Map<String, Object>> fieldDate = Util.getFieldDate(Util.getQueryDate(rs), key, Arrays.asList(value.getElement().split(",")));
-                    map.put(key, fieldDate);
+                    List<Map<String, Object>> fieldDate = Util.getFieldDate(queryDate, key, Arrays.asList(value.getElement().split(",")));
+                    esFieldData.put(key, fieldDate);
                 });
-//                specialFieldList.forEach((key, value) -> {
-//                    while (true) {
-//                        try {
-//                            if (!rs.next()) break;
-//                        } catch (SQLException e) {
-//                            e.printStackTrace();
-//                        }
-//                        Map<String, Object> m = new ConcurrentHashMap<>();
-//                        for (String s : Arrays.asList(value.getElement().split(","))) {
-//                            try {
-//                                m.put(s, rs.getObject(s));
-//                            } catch (SQLException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        mapList.add(m);
-//                    }
-//                    map.put(key, mapList);
-//                });
+
                 String idFieldName = mapping.get_id() == null ? mapping.getPk() : mapping.get_id();
-                Object idVal = data.get(idFieldName);
+                Object idVal = queryDate.get(0).get(idFieldName);
 
                 if (logger.isTraceEnabled()) {
                     logger.trace(
