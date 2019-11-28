@@ -8,14 +8,18 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.sql.DataSource;
 
-import com.alibaba.fastjson.JSON;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.common.hash.BloomFilter;
+import com.google.common.hash.Funnel;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkItemResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -96,8 +100,8 @@ public class ES7xTemplate implements ESTemplate {
 
             //如果查询未命中则直接插入,否则更新
             if (response.getHits().getHits().length == 0) {
-                //如果是简单模式并且不是主表则不执行插入.
-                if(mapping.getSyncMode().equals("simple")&&!mapping.isMain()){
+                //如果是简单模式并且不是主表则跳过插入.(从表只允许在主键已存在的情况下插入es)
+                if (mapping.getSyncMode().equals("simple") && !mapping.isMain()) {
                     return;
                 }
                 ESIndexRequest indexRequest = esConnection.new ES7xIndexRequest(mapping.get_index())
@@ -188,20 +192,50 @@ public class ES7xTemplate implements ESTemplate {
 
     @Override
     public void commit() {
-        System.out.println("提交请求数量:"+getBulk().numberOfActions());
         if (getBulk().numberOfActions() > 0) {
             List<DocWriteRequest<?>> requestList = getBulk().getRequest();
+            requestRepeatFilter(requestList);
+            System.out.println("提交ES请求数量:" + getBulk().numberOfActions());
             ESBulkResponse response = esBulkRequest.bulk();
             if (response.hasFailures()) {
                 List<BulkItemResponse> bulkResponse = response.processFailBulkResponse("ES sync commit error ");
                 for (int i = 0; i < bulkResponse.size(); i++) {
-                    if(bulkResponse.get(i)!=null){
+                    if (bulkResponse.get(i) != null) {
                         requestList.remove(i);
                     }
                 }
                 return;
             }
             resetBulkRequestBuilder();
+        }
+    }
+
+    @SuppressWarnings("all")
+    private void requestRepeatFilter(List<DocWriteRequest<?>> requestList) {
+        Set<String> set = new HashSet<>();
+        Iterator<DocWriteRequest<?>> requestIterator = requestList.iterator();
+        while (requestIterator.hasNext()) {
+            DocWriteRequest<?> request = requestIterator.next();
+            if (request instanceof UpdateRequest) {
+                UpdateRequest updateRequest = (UpdateRequest) request;
+                String s = request.id() + updateRequest.doc().source().hashCode();
+                if (set.contains(s)) {
+                    requestIterator.remove();
+                } else {
+                    set.add(s);
+                }
+                continue;
+            }
+
+            if (request instanceof IndexRequest) {
+                IndexRequest indexRequest = (IndexRequest) request;
+                String s = request.id() + indexRequest.source().hashCode();
+                if (set.contains(s)) {
+                    requestIterator.remove();
+                } else {
+                    set.add(s);
+                }
+            }
         }
     }
 
