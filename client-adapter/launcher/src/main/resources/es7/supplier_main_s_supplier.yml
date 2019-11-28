@@ -8,6 +8,7 @@ esMapping:
   upsert: true
   pk: supplierId
   syncMode: simple
+  main: true
   sql: "SELECT supplier_id        AS supplierId,
                repair_center_name AS repairCenterName,
                repair_center_name AS repairCenterCname,

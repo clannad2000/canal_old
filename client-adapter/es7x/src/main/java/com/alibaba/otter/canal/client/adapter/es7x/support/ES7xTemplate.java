@@ -93,8 +93,13 @@ public class ES7xTemplate implements ESTemplate {
                     .setQuery(QueryBuilders.termQuery(mapping.getPk(), pkVal))
                     .size(10000);
             SearchResponse response = esSearchRequest.getResponse();
+
             //如果查询未命中则直接插入,否则更新
             if (response.getHits().getHits().length == 0) {
+                //如果是简单模式并且不是主表则不执行插入.
+                if(mapping.getSyncMode().equals("simple")&&!mapping.isMain()){
+                    return;
+                }
                 ESIndexRequest indexRequest = esConnection.new ES7xIndexRequest(mapping.get_index())
                         .setSource(esFieldData);
                 if (StringUtils.isNotEmpty(parentVal)) {

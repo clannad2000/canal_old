@@ -51,10 +51,12 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
             if (data == null || data.isEmpty()) {
                 continue;
             }
+
             if (!findSpecialField(config.getEsMapping(), "nested").isEmpty()) {
                 nestedFieldInsert(config, dml, data);
-                return;
+                continue;
             }
+
             singleTableSimpleFiledInsert(config, dml, data);
         }
     }
@@ -72,6 +74,12 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
             if (data == null || data.isEmpty() || old == null || old.isEmpty()) {
                 continue;
             }
+
+            if (!findSpecialField(config.getEsMapping(), "nested").isEmpty()) {
+                nestedFieldInsert(config, dml, data);
+                continue;
+            }
+
             singleTableSimpleFiledUpdate(config, dml, data, old);
         }
     }
@@ -261,7 +269,7 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
 
                 String idFieldName = mapping.get_id() == null ? mapping.getPk() : mapping.get_id();
                 Object idVal = queryDate.get(0).get(idFieldName);
-
+                esFieldData.put(idFieldName, idVal);
                 if (logger.isTraceEnabled()) {
                     logger.trace(
                             "Main table insert to es index by query sql, destination:{}, table: {}, index: {}, id: {}",
@@ -271,7 +279,6 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
                             idVal);
                 }
                 esTemplate.insert(mapping, idVal, esFieldData);
-
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

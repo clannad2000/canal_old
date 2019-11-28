@@ -114,6 +114,8 @@ public class ESSyncConfig implements AdapterConfig {
         private SchemaItem                   schemaItem;                             // sql解析结果模型
 
         private String                       syncMode = "default";
+
+        private boolean main = false;
         private Map<String, FieldMapping> specialFields = new HashMap<>();
 
         public Map<String, FieldMapping> getSpecialFields() {
@@ -130,6 +132,14 @@ public class ESSyncConfig implements AdapterConfig {
 
         public void setSyncMode(String syncMode) {
             this.syncMode = syncMode;
+        }
+
+        public boolean isMain() {
+            return main;
+        }
+
+        public void setMain(boolean main) {
+            this.main = main;
         }
 
         public static class FieldMapping {
