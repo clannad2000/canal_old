@@ -74,6 +74,30 @@ public class ES7xTemplate implements ESTemplate {
         String parentVal = (String) esFieldData.remove("$parent_routing");
         //分为_id和主键两种类型
         if (mapping.get_id() != null) {
+
+            //简单模式
+            //如果是简单模式并且不是主表则执行更新操作
+            if (mapping.getSyncMode().equals("simple")) {
+                if (mapping.isMain()) {
+                    ESIndexRequest indexRequest = esConnection.new ES7xIndexRequest(mapping.get_index(), pkVal.toString())
+                            .setSource(esFieldData);
+                    if (StringUtils.isNotEmpty(parentVal)) {
+                        indexRequest.setRouting(parentVal);
+                    }
+                    getBulk().add(indexRequest);
+                } else {
+                    ESUpdateRequest updateRequest = esConnection.new ES7xUpdateRequest(mapping.get_index(),
+                            pkVal.toString()).setDoc(esFieldData);
+                    if (StringUtils.isNotEmpty(parentVal)) {
+                        updateRequest.setRouting(parentVal);
+                    }
+                    getBulk().add(updateRequest);
+                }
+                commitBulk();
+                return;
+            }
+
+            //默认模式
             if (mapping.isUpsert()) {
                 ESUpdateRequest updateRequest = esConnection.new ES7xUpdateRequest(mapping.get_index(),
                         pkVal.toString()).setDoc(esFieldData).setDocAsUpsert(true);
@@ -201,9 +225,10 @@ public class ES7xTemplate implements ESTemplate {
                 List<BulkItemResponse> bulkResponse = response.processFailBulkResponse("ES sync commit error ");
                 for (int i = 0; i < bulkResponse.size(); i++) {
                     if (bulkResponse.get(i) != null) {
-                        requestList.remove(i);
+                        requestList.set(i,null);
                     }
                 }
+                requestList.removeIf(Objects::isNull);
                 return;
             }
             resetBulkRequestBuilder();

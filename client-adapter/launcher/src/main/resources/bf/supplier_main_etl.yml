@@ -4,9 +4,9 @@ groupId: g2
 esMapping:
   _index: supplier_main
   _type: _doc
-  #  _id: supplierId
+  _id: supplierId
   upsert: true
-  pk: supplierId
+  #pk: supplierId
   sql: "SELECT s.supplier_id                                            AS supplierId,
                      u.user_name                                              AS userName,
                      u.tel,

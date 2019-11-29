@@ -4,9 +4,9 @@ groupId: g2
 esMapping:
   _index: supplier_main
   _type: _doc
-  #  _id: supplierId
+  _id: supplierId
   upsert: true
-  pk: supplierId
+#  pk: supplierId
   syncMode: simple
   main: true
   sql: "SELECT supplier_id        AS supplierId,

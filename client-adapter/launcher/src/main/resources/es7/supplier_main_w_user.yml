@@ -4,9 +4,8 @@ groupId: g2
 esMapping:
   _index: supplier_main
   _type: _doc
-  #  _id: supplierId
-  upsert: true
-  pk: supplierId
+  _id: supplierId
+ # pk: supplierId
   syncMode: simple
   specialFields:
     address:
