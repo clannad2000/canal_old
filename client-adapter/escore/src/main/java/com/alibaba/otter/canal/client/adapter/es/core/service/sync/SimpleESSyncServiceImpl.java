@@ -195,24 +195,15 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
         }
         Map<String, Object> map = new HashMap();
         switch (value.getType()) {
-            case "object":
-                //处理obj类型
-                value.getProperties().forEach((k, val) -> {
-                    map.put(val, dmlData.remove(k));
-                });
-                esFieldData.put(fieldName, map);
-                dmlData.put(fieldName, map);
-                break;
-            case "array":
-                //处理数组类型
+            case "concat":
+                //处理多字符串连接
                 StringBuilder stringBuilder = new StringBuilder();
                 for (String ele : Arrays.asList(value.getElement().split(","))) {
                     stringBuilder.append(dmlData.get(ele.trim()));
                 }
                 esFieldData.put(fieldName, stringBuilder.toString());
-                dmlData.put(fieldName, stringBuilder.toString());
                 break;
-            case "geoPoint":
+            case "geo_point":
                 //处理地理位置类型
                 String[] arr = value.getElement().split(",");
                 Map<String, Double> location = new HashMap<>();
@@ -221,8 +212,19 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
                 location.put("lat", Double.valueOf(lat));
                 location.put("lon", Double.valueOf(lon));
                 esFieldData.put(fieldName, location);
-                dmlData.put(fieldName, location);
                 break;
+            case "object":
+                //处理obj类型
+                value.getProperties().forEach((k, val) -> {
+                    map.put(val, dmlData.remove(k));
+                });
+                esFieldData.put(fieldName, map);
+                //dmlData.put(fieldName, map);
+                break;
+            case "array":
+                //处理数组类型
+                String[] values = value.getElement().split(",");
+                esFieldData.put(fieldName, Arrays.asList(values));
         }
     }
 

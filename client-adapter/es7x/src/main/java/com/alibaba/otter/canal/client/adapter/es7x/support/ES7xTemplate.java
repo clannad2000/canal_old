@@ -195,7 +195,7 @@ public class ES7xTemplate implements ESTemplate {
         if (getBulk().numberOfActions() > 0) {
             List<DocWriteRequest<?>> requestList = getBulk().getRequest();
             requestRepeatFilter(requestList);
-            System.out.println("提交ES请求数量:" + getBulk().numberOfActions());
+            System.out.println("提交ES请求数量:" + requestList.size());
             ESBulkResponse response = esBulkRequest.bulk();
             if (response.hasFailures()) {
                 List<BulkItemResponse> bulkResponse = response.processFailBulkResponse("ES sync commit error ");
@@ -210,7 +210,6 @@ public class ES7xTemplate implements ESTemplate {
         }
     }
 
-    @SuppressWarnings("all")
     private void requestRepeatFilter(List<DocWriteRequest<?>> requestList) {
         Set<String> set = new HashSet<>();
         Iterator<DocWriteRequest<?>> requestIterator = requestList.iterator();

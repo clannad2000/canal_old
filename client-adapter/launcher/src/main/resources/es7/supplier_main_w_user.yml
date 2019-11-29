@@ -10,10 +10,10 @@ esMapping:
   syncMode: simple
   specialFields:
     address:
-      type: array
+      type: concat
       element: pro_name,city_name,area_name,detailed
     location:
-      type: geoPoint
+      type: geo_point
       element: lat,lng
   sql: "SELECT id                                               AS supplierId,
                user_name                                        AS userName,
@@ -34,7 +34,7 @@ esMapping:
                rong_token                                       AS rongToken,
                modify_time                                      AS modifyTime,
                tx_token                                         AS txToken,
-               concat(IFNULL(lat, 0), IFNULL(lng, 0))           AS location
+               concat(IFNULL(lat, 0), ',', IFNULL(lng, 0))      AS location
         FROM s_user"
 #  etlCondition: "where a.c_time>='{0}'"
   commitBatch: 3000

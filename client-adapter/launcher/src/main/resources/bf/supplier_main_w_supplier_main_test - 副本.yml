@@ -1,0 +1,18 @@
+dataSourceKey: defaultDS
+destination: example
+groupId: g2
+esMapping:
+  _index: supplier_main
+  _type: _doc
+  #  _id: supplierId
+  upsert: true
+  pk: supplierId
+  sql: "select supplier_id                                                                  as supplierId,
+                     concat('[', group_concat(
+                             json_object('groupId', group_id, 'childName', child_name, 'brandId', brand_id,
+                                         'carName', car_name, 'carId', car_id, 'url', url)), ']') AS brand
+              from w_supplier_main"
+  objFields:
+    brand: object
+  #  etlCondition: "where a.c_time>='{0}'"
+  commitBatch: 3000
