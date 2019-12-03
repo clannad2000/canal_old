@@ -11,7 +11,15 @@ esMapping:
     brand:
       type: nested
       element: id,url,brandId,childName,carName,carId,groupId
-  sql: "select supplier_id as supplierId, id, url, brand_id as brandId, child_name as childName, car_name as carName, car_id as carId, group_id as groupId
+  sql: "select supplier_id as supplierId,
+               id,
+               url,
+               brand_id    as brandId,
+               child_name  as childName,
+               car_name    as carName,
+               car_id      as carId,
+               group_id    as groupId,
+               concat(child_name,',',car_name) as fullName
         from w_supplier_main"
 #  objFields:
 #    brand: object
