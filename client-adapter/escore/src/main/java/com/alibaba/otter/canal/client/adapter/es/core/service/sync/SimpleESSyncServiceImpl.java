@@ -162,7 +162,7 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
         }
         esTemplate.update(mapping, idVal, esFieldData);
     }
-
+    //处理特殊字段
     public void getSpecialFieldForDmlDate(ESMapping mapping, Map<String, Object> dmlData, Map<String, Object> dmlOld,
                                           Map<String, Object> esFieldData) {
         mapping.getSpecialFields().forEach((key, value) -> {
@@ -271,7 +271,11 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
 
                 String idFieldName = mapping.get_id() == null ? mapping.getPk() : mapping.get_id();
                 Object idVal = queryDate.get(0).get(idFieldName);
-                esFieldData.put(idFieldName, idVal);
+
+                if(mapping.getPk()!=null){
+                    esFieldData.put(idFieldName, idVal);
+                }
+
                 if (logger.isTraceEnabled()) {
                     logger.trace(
                             "Main table insert to es index by query sql, destination:{}, table: {}, index: {}, id: {}",

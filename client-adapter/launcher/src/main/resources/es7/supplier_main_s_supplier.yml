@@ -4,22 +4,24 @@ groupId: g2
 esMapping:
   _index: supplier_main
   _type: _doc
-  _id: supplierId
+  _id: _id
   upsert: true
 #  pk: supplierId
   syncMode: simple
   main: true
-  sql: "SELECT supplier_id        AS supplierId,
-               repair_center_name AS repairCenterName,
-               repair_center_name AS repairCenterCname,
-               shop_url           AS shopUrl,
-               manager_phone      AS managerPhone,
-               service_tel        AS serviceTel,
-               shop_profile       AS shopProfile,
-               member_end_time    AS memberEndTime,
+  sql: "SELECT supplier_id          AS _id,
+               supplier_id          AS supplierId,
+               repair_center_name   AS repairCenterName,
+               repair_center_name   AS repairCenterCname,
+               repair_center_number AS repairCenterNumber,
+               shop_url             AS shopUrl,
+               manager_phone        AS managerPhone,
+               service_tel          AS serviceTel,
+               shop_profile         AS shopProfile,
+               member_end_time      AS memberEndTime,
                audit,
-               supplier_order     AS supplierOrder,
-               member_level       AS memberLevel
+               supplier_order       AS supplierOrder,
+               member_level         AS memberLevel
         FROM s_supplier"
   #objFields:
     #brand: object

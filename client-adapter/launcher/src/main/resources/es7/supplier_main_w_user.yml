@@ -4,7 +4,7 @@ groupId: g2
 esMapping:
   _index: supplier_main
   _type: _doc
-  _id: supplierId
+  _id: _id
  # pk: supplierId
   syncMode: simple
   specialFields:
@@ -14,7 +14,7 @@ esMapping:
     location:
       type: geo_point
       element: lat,lng
-  sql: "SELECT id                                               AS supplierId,
+  sql: "SELECT id                                               AS _id,
                user_name                                        AS userName,
                tel,
                number,

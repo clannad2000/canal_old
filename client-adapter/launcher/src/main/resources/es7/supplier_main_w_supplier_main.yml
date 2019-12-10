@@ -4,14 +4,14 @@ groupId: g2
 esMapping:
   _index: supplier_main
   _type: _doc
-  _id: supplierId
+  _id: _id
 #  pk: supplierId
   syncMode: simple
   specialFields:
     brand:
       type: nested
       element: id,url,brandId,childName,carName,carId,groupId
-  sql: "select supplier_id as supplierId,
+  sql: "select supplier_id as _id,
                id,
                url,
                brand_id    as brandId,

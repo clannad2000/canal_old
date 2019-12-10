@@ -4,10 +4,11 @@ groupId: g2
 esMapping:
   _index: supplier_main
   _type: _doc
-  _id: supplierId
+  _id: id
   upsert: true
   #pk: supplierId
-  sql: "SELECT s.supplier_id                                            AS supplierId,
+  sql: "SELECT s.supplier_id                                            AS id,
+               s.supplier_id                                            AS supplierId,
                u.user_name                                              AS userName,
                u.tel,
                u.number,
@@ -29,6 +30,7 @@ esMapping:
                concat(IFNULL(u.lat, 0), ',', IFNULL(u.lng, 0))          AS location,
                s.repair_center_name                                     AS repairCenterName,
                s.repair_center_name                                     AS repairCenterCname,
+               s.repair_center_number                                   AS repairCenterNumber,
                s.shop_url                                               AS shopUrl,
                s.manager_phone                                          AS managerPhone,
                s.service_tel                                            AS serviceTel,

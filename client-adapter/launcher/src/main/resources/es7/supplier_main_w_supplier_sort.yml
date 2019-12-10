@@ -4,10 +4,10 @@ groupId: g2
 esMapping:
   _index: supplier_main
   _type: _doc
-  _id: supplierId
+  _id: _id
  # pk: supplierId
   syncMode: simple
-  sql: "select supplier_id as supplierId,
+  sql: "select supplier_id as _id,
                call_number AS callNumber,
                sell_number AS sellNumber
         FROM w_supplier_sort"
