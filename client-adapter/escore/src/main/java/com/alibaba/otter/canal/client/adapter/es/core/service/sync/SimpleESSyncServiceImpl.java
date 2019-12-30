@@ -98,11 +98,9 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
             }
 
             ESMapping mapping = config.getEsMapping();
-
             FieldItem pkFieldItem = schemaItem.getIdFieldItem(mapping);
-            Map<String, Object> esFieldData = new LinkedHashMap<>();
-            Object pkVal = esTemplate.getESDataFromDmlData(mapping, data, esFieldData);
-            //getSpecialFieldForDmlDate(mapping, data, null, esFieldData);
+            //处理复合主键
+            String pkVal = getPkValFromData(mapping, data);
             if (logger.isTraceEnabled()) {
                 logger.trace("Main table delete es index, destination:{}, table: {}, index: {}, pk: {}",
                         config.getDestination(),
@@ -110,9 +108,7 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
                         mapping.get_index(),
                         pkVal);
             }
-            esFieldData.remove(pkFieldItem.getFieldName());
-            esFieldData.keySet().forEach(key -> esFieldData.put(key, null));
-            esTemplate.delete(mapping, pkVal, esFieldData);
+            esTemplate.delete(mapping, pkVal, new LinkedHashMap<>());
         }
     }
 
@@ -128,7 +124,14 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
         ESMapping mapping = config.getEsMapping();
         Map<String, Object> esFieldData = new LinkedHashMap<>();
         Object idVal = esTemplate.getESDataFromDmlData(mapping, data, esFieldData);
+        //处理特殊字段
         getSpecialFieldForDmlDate(mapping, data, null, esFieldData);
+        //处理默认值
+
+        //处理复合主键
+        idVal = getPkValFromData(mapping, data);
+
+
         if (logger.isTraceEnabled()) {
             logger.trace("Single table insert to es index, destination:{}, table: {}, index: {}, id: {}",
                     config.getDestination(),
@@ -153,6 +156,8 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
         Map<String, Object> esFieldData = new LinkedHashMap<>();
         Object idVal = esTemplate.getESDataFromDmlData(mapping, data, old, esFieldData);
         getSpecialFieldForDmlDate(mapping, data, null, esFieldData);
+        //处理复合主键
+        idVal = getPkValFromData(mapping, data);
         if (logger.isTraceEnabled()) {
             logger.trace("Main table update to es index, destination:{}, table: {}, index: {}, id: {}",
                     config.getDestination(),
@@ -162,13 +167,10 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
         }
         esTemplate.update(mapping, idVal, esFieldData);
     }
+
     //处理特殊字段
     public void getSpecialFieldForDmlDate(ESMapping mapping, Map<String, Object> dmlData, Map<String, Object> dmlOld,
                                           Map<String, Object> esFieldData) {
-        mapping.getSpecialFields().forEach((key, value) -> {
-            esFieldData.remove(key);
-        });
-
 //        if (dmlOld != null) {
 //            Map<String, FieldItem> selectFields = mapping.getSchemaItem().getSelectFields();
 //            dmlOld.forEach((oldKey, oldVal) -> {
@@ -183,17 +185,84 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
 //            });
 //            return;
 //        }
+        if (mapping.getSpecialFields().isEmpty()) return;
+
+        mapping.getSpecialFields().forEach((key, value) -> {
+            esFieldData.remove(key);
+        });
 
         mapping.getSpecialFields().forEach((key, value) -> {
             getSpecialFieldValFromData(mapping, dmlData, esFieldData, key, value);
         });
     }
 
+
+//    private void getSpecialFieldValFromData(ESMapping esMapping, Map<String, Object> dmlData, Map<String, Object> esFieldData, String fieldName, ESMapping.FieldMapping value) {
+//        if (esFieldData.containsKey(fieldName)) {
+//            return;
+//        }
+//        Object data = getSpecialFieldValFromData(dmlData, value);
+//        esFieldData.put(fieldName, data);
+//    }
+
+
+    private String getPkValFromData(ESMapping esMapping, Map<String, Object> dmlData) {
+        String idFieldName = esMapping.get_id() == null ? esMapping.getPk() : esMapping.get_id();
+        List<SchemaItem.ColumnItem> columnItems = esMapping.getSchemaItem().getSelectFields().get(idFieldName).getColumnItems();
+        if (columnItems.size() == 1 || esMapping.get_id() == null) {
+            return dmlData.get(columnItems.get(0).getColumnName()).toString();
+        }
+        if (columnItems.size() == 3) {
+            return dmlData.get(columnItems.get(0).getColumnName()).toString() + dmlData.get(columnItems.get(2).getColumnName()).toString();
+        } else {
+            return dmlData.get(columnItems.get(0).getColumnName()).toString() + dmlData.get(columnItems.get(1).getColumnName()).toString();
+        }
+    }
+
+
+//    private Object getSpecialFieldValFromData(Map<String, Object> dmlData, ESMapping.FieldMapping value) {
+//
+//        Map<String, Object> map = new HashMap<>();
+//        switch (value.getType()) {
+//            case "concat":
+//                //处理多字符串连接
+//                StringBuilder stringBuilder = new StringBuilder();
+//                for (String ele : value.getElement().split(",")) {
+//                    stringBuilder.append(dmlData.get(ele.trim()));
+//                }
+//                return stringBuilder.toString();
+//            case "geo_point":
+//                //处理地理位置类型
+//                String[] arr = value.getElement().split(",");
+//                Map<String, Double> location = new HashMap<>();
+//                String lat = dmlData.get(arr[0].trim()) != null ? dmlData.remove(arr[0].trim()).toString() : "0";
+//                String lon = dmlData.get(arr[1].trim()) != null ? dmlData.remove(arr[1].trim()).toString() : "0";
+//                location.put("lat", Double.valueOf(lat));
+//                location.put("lon", Double.valueOf(lon));
+//                return location;
+//            case "object":
+//                //处理obj类型
+//                value.getProperties().forEach((k, val) -> {
+//                    map.put(val.toString(), dmlData.remove(k));
+//                });
+//                return map;
+//            case "array":
+//                //处理数组类型
+//                String[] values = value.getElement().split(",");
+//                return Arrays.asList(values);
+//            case "default":
+//                //处理默认值
+//            default:
+//                return null;
+//        }
+//    }
+
+
     private void getSpecialFieldValFromData(ESMapping esMapping, Map<String, Object> dmlData, Map<String, Object> esFieldData, String fieldName, ESMapping.FieldMapping value) {
         if (esFieldData.containsKey(fieldName)) {
             return;
         }
-        Map<String, Object> map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         switch (value.getType()) {
             case "concat":
                 //处理多字符串连接
@@ -225,8 +294,13 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
                 //处理数组类型
                 String[] values = value.getElement().split(",");
                 esFieldData.put(fieldName, Arrays.asList(values));
+            case "default":
+                //处理默认值
+                LinkedHashMap<String, String> linkedHashMap = value.getProperties();
+                esFieldData.putAll(linkedHashMap);
         }
     }
+
 
     public Map<String, ESMapping.FieldMapping> findSpecialField(ESMapping esMapping, String type) {
         Map<String, ESMapping.FieldMapping> map = new ConcurrentHashMap<>();
@@ -272,7 +346,7 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
                 String idFieldName = mapping.get_id() == null ? mapping.getPk() : mapping.get_id();
                 Object idVal = queryDate.get(0).get(idFieldName);
 
-                if(mapping.getPk()!=null){
+                if (mapping.getPk() != null) {
                     esFieldData.put(idFieldName, idVal);
                 }
 
@@ -291,5 +365,6 @@ public class SimpleESSyncServiceImpl extends ESSyncService implements SyncServic
             return 0;
         });
     }
+
 
 }

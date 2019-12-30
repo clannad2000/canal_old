@@ -10,7 +10,7 @@ esMapping:
   specialFields:
     brand:
       type: nested
-      element: id,url,brandId,childName,carName,carId,groupId
+      element: id,url,brandId,carId,groupId,childName,carName,fullName
   sql: "select supplier_id as _id,
                id,
                url,

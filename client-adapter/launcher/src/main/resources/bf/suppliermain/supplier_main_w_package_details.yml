@@ -1,0 +1,17 @@
+dataSourceKey: defaultDS
+destination: example
+groupId: g2
+esMapping:
+  _index: supplier_main
+  _type: _doc
+  _id: _id
+  # pk: supplierId
+  syncMode: simple
+  sql: "select supplier_id as _id,
+               call_number AS callNumber,
+               sell_number AS sellNumber
+        FROM w_supplier_sort"
+  #objFields:
+  #brand: object
+  #  etlCondition: "where a.c_time>='{0}'"
+  commitBatch: 3000

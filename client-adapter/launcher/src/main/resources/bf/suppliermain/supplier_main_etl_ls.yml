@@ -1,0 +1,50 @@
+dataSourceKey: defaultDS
+destination: example
+groupId: g2
+esMapping:
+  _index: supplier_main
+  _type: _doc
+  _id: _id
+  upsert: true
+  #pk: supplierId
+  sql: "SELECT s.supplier_id                                            AS _id,
+               s.supplier_id                                            AS supplierId,
+               u.user_name                                              AS userName,
+               u.tel,
+               u.number,
+               u.unionid,
+               u.company                                                AS supplierName,
+               u.contact,
+               concat(u.pro_name, u.city_name, u.area_name, u.detailed) as address,
+               u.pro_number                                             AS proNumber,
+               u.area_number                                            AS areaNumber,
+               u.city_number                                            AS cityNumber,
+               u.head_url                                               AS supplierHead,
+               u.creation_time                                          AS creationTime,
+               u.account,
+               u.account_state                                          AS accountState,
+               u.user_state                                             AS userState,
+               u.rong_token                                             AS rongToken,
+               u.modify_time                                            AS modifyTime,
+               u.tx_token                                               AS txToken,
+               concat(IFNULL(u.lat, 0), ',', IFNULL(u.lng, 0))          AS location,
+               s.repair_center_name                                     AS repairCenterName,
+               s.repair_center_name                                     AS repairCenterCname,
+               s.repair_center_number                                   AS repairCenterNumber,
+               s.shop_url                                               AS shopUrl,
+               s.manager_phone                                          AS managerPhone,
+               s.service_tel                                            AS serviceTel,
+               s.shop_profile                                           AS shopProfile,
+               s.member_end_time                                        AS memberEndTime,
+               s.audit,
+               s.supplier_order                                         AS supplierOrder,
+               s.member_level                                           AS memberLevel,
+               a.call_number                                            AS callNumber,
+               a.sell_number                                            AS sellNumber
+        FROM s_supplier s
+                 LEFT JOIN s_user u ON s.supplier_id = u.id
+                 LEFT JOIN w_supplier_sort a ON s.supplier_id = a.supplier_id"
+#  objFields:
+#    brand: object
+  #  etlCondition: "where a.c_time>='{0}'"
+  commitBatch: 3000

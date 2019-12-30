@@ -1,0 +1,37 @@
+dataSourceKey: defaultDS
+destination: example
+groupId: g3
+esMapping:
+  _index: logistics-b_guest
+  _type: _doc
+  _id: _id
+  upsert: false
+#  pk: supplierId
+  syncMode: simple
+  main: true
+#  specialFields:
+#    _id:
+#      type: concat
+#      element: dot_id,tel
+  sql: "select id as _id,
+               tel,
+               guest_name as guestName,
+               guest_address as guestAddress,
+               send_line_id as sendLineId,
+               create_time as createTime,
+               store_id as storeId,
+               store_name as storeName,
+               dot_id as dotId,
+               send_type as sendType,
+               idcard_name as idcardName,
+               idcard_no as idcardNo,
+               account_no as accountNo,
+               account_name as accountName,
+               account_bank_name as accountBankName,
+               alipay_no as alipayNo,
+               wechart_no as wechartNo
+        from b_guest"
+#  objFields:
+    #brand: object
+  #  etlCondition: "where a.c_time>='{0}'"
+  commitBatch: 3000

@@ -27,7 +27,7 @@ import com.alibaba.otter.canal.server.netty.NettyUtils;
 
 /**
  * 客户端身份认证处理
- * 
+ *
  * @author jianghang 2012-10-24 上午11:12:45
  * @version 1.0.0
  */
@@ -35,7 +35,7 @@ public class ClientAuthenticationHandler extends SimpleChannelHandler {
 
     private static final Logger     logger                                  = LoggerFactory.getLogger(ClientAuthenticationHandler.class);
     private final int               SUPPORTED_VERSION                       = 3;
-    private final int               defaultSubscriptorDisconnectIdleTimeout = 60 * 60 * 1000;
+    private final int               defaultSubscriptorDisconnectIdleTimeout = 60 * 60 * 60 * 1000;
     private CanalServerWithEmbedded embeddedServer;
     private byte[]                  seed;
 

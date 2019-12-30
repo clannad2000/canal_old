@@ -1,0 +1,31 @@
+dataSourceKey: defaultDS
+destination: example
+groupId: g3
+esMapping:
+  _index: logistics-s_user
+  _type: _doc
+  _id: _id
+  upsert: false
+#  pk: supplierId
+  syncMode: simple
+  specialFields:
+    guestAddress:
+      type: concat
+      element: pro_name, city_name, area_name, detailed
+    defaultVals:
+      type: default
+      properties:
+        isRegistered: 1
+  main: true
+  sql: "select
+               id as _id,
+               tel                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   nknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknknk ,
+               company as guestName,
+               concat(pro_name, city_name, area_name, detailed) as guestAddress,
+               account_state as accountState,
+               user_state as userState
+        from s_user"
+  #objFields:
+    #brand: object
+  #  etlCondition: "where a.c_time>='{0}'"
+  commitBatch: 3000

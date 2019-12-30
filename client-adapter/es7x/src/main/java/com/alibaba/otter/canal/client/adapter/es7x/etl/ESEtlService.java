@@ -142,8 +142,8 @@ public class ESEtlService extends AbstractEtlService {
                                     .size(10000);
                             SearchResponse response = esSearchRequest.getResponse();
 
-                            //如果查询未命中则直接插入,否则更新
-                            if (response.getHits().getHits().length == 0) {
+                            //如果查询未命中则直接插入,否则更新. 在pk模式下,如果isUpsert状态为false 则不做插入操作.默认为false
+                            if (response.getHits().getHits().length == 0 && mapping.isUpsert()) {
                                 ESIndexRequest indexRequest = esConnection.new ES7xIndexRequest(mapping.get_index())
                                         .setSource(esFieldData);
                                 if (StringUtils.isNotEmpty(parentVal)) {
