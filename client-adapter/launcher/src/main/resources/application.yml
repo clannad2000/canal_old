@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 9999
 spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -8,7 +8,8 @@ spring:
 canal.conf:
   mode: tcp # kafka rocketMQ
   canalServerHost: 192.168.2.120:11111
-  #  zookeeperHosts: slave1:2181
+ # canalServerHost: 127.0.0.1:11111
+  #zookeeperHosts: 192.168.2.171:2181,192.168.2.174:2181,192.168.2.175:2181
   #  mqServers: 127.0.0.1:9092 #or rocketmq
   #  flatMessage: true
   batchSize: 500
@@ -22,13 +23,14 @@ canal.conf:
   vhost:
   srcDataSources:
     defaultDS:
-      url: jdbc:mysql://127.0.0.1:3306/canal?useUnicode=true
+      url: jdbc:mysql://192.168.2.175:3306/logistics?useUnicode=true
+#      url: jdbc:mysql://127.0.0.1:3306/canal?useUnicode=true
       username: canal
-      password: canal
+      password: szyg12345678
   canalAdapters:
     - instance: example # canal instance Name or mq topic name
       groups:
-        - groupId: g2
+        - groupId: g3
           outerAdapters:
             - name: logger
             #      - name: rdb

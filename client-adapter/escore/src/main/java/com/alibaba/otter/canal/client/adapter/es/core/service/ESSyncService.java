@@ -32,6 +32,7 @@ import com.alibaba.otter.canal.client.adapter.support.Util;
  */
 public class ESSyncService {
 
+
     private static Logger logger = LoggerFactory.getLogger(ESSyncService.class);
 
     protected ESTemplate esTemplate;
@@ -96,12 +97,15 @@ public class ESSyncService {
             long begin = System.currentTimeMillis();
 
             String type = dml.getType();
-            if (type != null && type.equalsIgnoreCase("INSERT")) {
-                SyncServiceFactory.getInstance(config.getEsMapping().getSyncMode()).insert(config, dml);
-            } else if (type != null && type.equalsIgnoreCase("UPDATE")) {
-                SyncServiceFactory.getInstance(config.getEsMapping().getSyncMode()).update(config, dml);
-            } else if (type != null && type.equalsIgnoreCase("DELETE")) {
-                SyncServiceFactory.getInstance(config.getEsMapping().getSyncMode()).delete(config, dml);
+            String syncMode = config.getEsMapping().getSyncMode();
+            List<String> skipsSync = config.getEsMapping().getSkipSync();
+            if (type == null) return;
+            if (type.equalsIgnoreCase("INSERT") && !skipsSync.contains("INSERT")) {
+                SyncServiceFactory.getInstance(syncMode).insert(config, dml);
+            } else if (type.equalsIgnoreCase("UPDATE") && !skipsSync.contains("UPDATE")) {
+                SyncServiceFactory.getInstance(syncMode).update(config, dml);
+            } else if (type.equalsIgnoreCase("DELETE") && !skipsSync.contains("DELETE")) {
+                SyncServiceFactory.getInstance(syncMode).delete(config, dml);
             } else {
                 return;
             }

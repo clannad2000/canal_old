@@ -115,7 +115,18 @@ public class ESSyncConfig implements AdapterConfig {
 
         private String                       syncMode = "default";
 
+        private List<String>                 skipSync = new ArrayList<>();
+
         private boolean main = false;
+
+        public List<String> getSkipSync() {
+            return skipSync;
+        }
+
+        public void setSkipsSync(List<String> skipsSync) {
+            this.skipSync = skipsSync;
+        }
+
         private Map<String, FieldMapping> specialFields = new HashMap<>();
 
         public Map<String, FieldMapping> getSpecialFields() {

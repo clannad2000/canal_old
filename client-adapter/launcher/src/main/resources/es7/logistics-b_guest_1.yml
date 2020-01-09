@@ -8,16 +8,19 @@ esMapping:
   upsert: false
   pk: tel
   syncMode: simple
+  skipSync:
+    - DELETE
   specialFields:
     defaultVals:
       type: default
       properties:
         isRegistered: 1
   sql: "select
-               tel,
+               user_name as tel,
                company as guestName,
                account_state as accountState,
-               user_state as userState
+               user_state as userState,
+               '1' as isRegistered
         from s_user"
   #objFields:
     #brand: object

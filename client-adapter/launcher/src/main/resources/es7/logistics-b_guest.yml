@@ -9,6 +9,8 @@ esMapping:
 #  pk: supplierId
   syncMode: simple
   main: true
+  skipSync:
+    - INSERT
 #  specialFields:
 #    _id:
 #      type: concat
@@ -30,7 +32,8 @@ esMapping:
                account_name as accountName,
                account_bank_name as accountBankName,
                alipay_no as alipayNo,
-               wechart_no as wechartNo
+               wechart_no as wechartNo,
+               is_registered as isRegistered
         from b_guest"
 #  objFields:
     #brand: object
